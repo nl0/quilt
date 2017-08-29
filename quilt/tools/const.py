@@ -8,6 +8,7 @@ class TargetType(Enum):
     Enums for target types
     """
     PANDAS = 'pandas'
+    ARRAY = 'array'
     FILE = 'file'
 
 DATEF = '%Y-%m-%d'

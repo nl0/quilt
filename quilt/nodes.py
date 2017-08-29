@@ -2,6 +2,7 @@
 Nodes that represent the data in a Quilt package.
 """
 
+import numpy as np
 import pandas as pd
 from six import iteritems, string_types
 
@@ -104,6 +105,8 @@ class PackageNode(GroupNode):
 
         if isinstance(value, pd.DataFrame):
             core_node = core.TableNode(hashes=[])
+        elif isinstance(value, np.ndarray):
+            core_node = core.ArrayNode(hashes=[])
         elif isinstance(value, string_types):
             core_node = core.FileNode(hashes=[])
         else:

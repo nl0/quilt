@@ -48,7 +48,7 @@ class FakeLoader(object):
 
 
 def _from_core_node(package, core_node):
-    if isinstance(core_node, core.TableNode) or isinstance(core_node, core.FileNode):
+    if isinstance(core_node, core.LeafNode):
         node = DataNode(package, core_node)
     else:
         if isinstance(core_node, core.RootNode):

@@ -26,8 +26,8 @@ from tqdm import tqdm
 
 from .build import build_package, build_package_from_contents, generate_build_file, generate_contents, BuildException
 from .const import DEFAULT_BUILDFILE, LATEST_TAG
-from .core import (hash_contents, find_object_hashes, GroupNode, TableNode, FileNode, PackageFormat,
-                   decode_node, encode_node)
+from .core import (hash_contents, find_object_hashes, ArrayNode, GroupNode, TableNode, FileNode,
+                   PackageFormat, decode_node, encode_node)
 from .hashing import digest_file
 from .store import PackageStore, StoreException
 from .util import BASE_DIR, FileWithReadProgress, gzip_compress
@@ -292,6 +292,9 @@ def build_from_node(package, node):
                 df = node._data()
                 package_obj.save_df(df, path, metadata.get('q_path'), metadata.get('q_ext'),
                                     'pandas', PackageFormat.default)
+            elif isinstance(core_node, ArrayNode):
+                array = node._data()
+                package_obj.save_array(array, path, metadata.get('q_path'))
             elif isinstance(core_node, FileNode):
                 src_path = node._data()
                 package_obj.save_file(src_path, path, metadata.get('q_path'))

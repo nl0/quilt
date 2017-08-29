@@ -70,32 +70,7 @@ class RootNode(GroupNode):
             del val['format']
         return val
 
-class TableNode(Node):
-    json_type = 'TABLE'
-
-    def __init__(self, hashes, format=None, metadata=None):
-        if metadata is None:
-            metadata = {}
-
-        assert isinstance(hashes, list)
-        assert format is None or isinstance(format, string_types), '%r' % format
-        assert isinstance(metadata, dict)
-
-        self.hashes = hashes
-        self.format = PackageFormat(format) if format is not None else None
-        self.metadata = metadata
-
-    def __json__(self):
-        val = super(TableNode, self).__json__()
-        if self.format is not None:
-            val['format'] = self.format.value
-        else:
-            del val['format']
-        return val
-
-class FileNode(Node):
-    json_type = 'FILE'
-
+class LeafNode(Node):
     def __init__(self, hashes, metadata=None):
         if metadata is None:
             metadata = {}
@@ -106,7 +81,33 @@ class FileNode(Node):
         self.hashes = hashes
         self.metadata = metadata
 
-NODE_TYPE_TO_CLASS = {cls.json_type: cls for cls in [GroupNode, RootNode, TableNode, FileNode]}
+class TableNode(LeafNode):
+    json_type = 'TABLE'
+
+    def __init__(self, hashes, format=None, metadata=None):
+        super(TableNode, self).__init__(hashes, metadata)
+
+        assert format is None or isinstance(format, string_types), '%r' % format
+
+        self.format = PackageFormat(format) if format is not None else None
+
+    def __json__(self):
+        val = super(TableNode, self).__json__()
+        if self.format is not None:
+            val['format'] = self.format.value
+        else:
+            del val['format']
+        return val
+
+class ArrayNode(LeafNode):
+    json_type = 'ARRAY'
+
+class FileNode(LeafNode):
+    json_type = 'FILE'
+
+NODE_TYPE_TO_CLASS = {
+    cls.json_type: cls for cls in [GroupNode, RootNode, TableNode, ArrayNode, FileNode]
+}
 
 def encode_node(node):
     if isinstance(node, Node):
@@ -140,7 +141,7 @@ def hash_contents(contents):
 
     def _hash_object(obj):
         _hash_str(obj.json_type)
-        if isinstance(obj, TableNode) or isinstance(obj, FileNode):
+        if isinstance(obj, LeafNode):
             hashes = obj.hashes
             _hash_int(len(hashes))
             for h in hashes:
@@ -162,7 +163,7 @@ def find_object_hashes(obj):
     """
     Iterator that returns hashes of all of the tables.
     """
-    if isinstance(obj, TableNode) or isinstance(obj, FileNode):
+    if isinstance(obj, LeafNode):
         for objhash in obj.hashes:
             yield objhash
     elif isinstance(obj, GroupNode):

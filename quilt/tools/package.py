@@ -5,12 +5,13 @@ import os
 from shutil import copyfile, copyfileobj, move, rmtree
 import tempfile
 
+import numpy as np
 import pandas as pd
 from six import itervalues
 
 from .const import TargetType
 from .core import (decode_node, encode_node, hash_contents,
-                   FileNode, RootNode, GroupNode, TableNode,
+                   ArrayNode, FileNode, RootNode, GroupNode, TableNode,
                    PackageFormat)
 from .hashing import digest_file
 
@@ -138,6 +139,12 @@ class Package(object):
         else:
             assert False, "Unimplemented package format: %s" % enumformat
 
+    def _array(self, hash_list):
+        assert len(hash_list) == 1
+        path = self._store.object_path(hash_list[0])
+        with open(path, 'rb') as fd:
+            return np.load(fd, allow_pickle=False)
+
     def _check_hashes(self, hash_list):
         for objhash in hash_list:
             path = self._store.object_path(objhash)
@@ -186,6 +193,20 @@ class Package(object):
             self._add_to_contents(buildfile, [filehash], ext, path, target, format)
             move(storepath, self._store.object_path(filehash))
 
+    def save_array(self, array, name, path):
+        """
+        Save a numpy array to the store.
+        """
+        buildfile = name.lstrip('/').replace('/', '.')
+        storepath = self._store.temporary_object_path(buildfile)
+
+        with open(storepath, 'wb') as fd:
+            np.save(fd, array, allow_pickle=False)
+
+        filehash = digest_file(storepath)
+        self._add_to_contents(buildfile, [filehash], '', path, 'array', None)
+        move(storepath, self._store.object_path(filehash))
+
     def save_file(self, srcfile, name, path):
         """
         Save a (raw) file to the store.
@@ -224,6 +245,9 @@ class Package(object):
         if isinstance(node, TableNode):
             self._check_hashes(node.hashes)
             return self._dataframe(node.hashes, node.format)
+        elif isinstance(node, ArrayNode):
+            self._check_hashes(node.hashes)
+            return self._array(node.hashes)
         elif isinstance(node, GroupNode):
             hash_list = [h for c in node.preorder_tablenodes() for h in c.hashes]
             self._check_hashes(hash_list)
@@ -304,6 +328,11 @@ class Package(object):
                 node = TableNode(
                     hashes=hashes,
                     format=format.value,
+                    metadata=metadata
+                )
+            elif target_type is TargetType.ARRAY:
+                node = ArrayNode(
+                    hashes=hashes,
                     metadata=metadata
                 )
             elif target_type is TargetType.FILE:
