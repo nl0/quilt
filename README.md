@@ -1,4 +1,4 @@
-| OS | Production [![PyPI](https://img.shields.io/pypi/v/quilt.svg)]() | Development `master` | Python support |
+| OS | Production [![PyPI](https://img.shields.io/pypi/v/quilt.svg)](https://pypi.python.org/pypi/quilt) | Development `master` | Python support |
 |----|--------------|----------|----------------|
 | <img height="20" src="http://icons.iconarchive.com/icons/dakirby309/simply-styled/256/OS-Linux-icon.png"> | [![Build Status](https://travis-ci.org/quiltdata/quilt.svg?branch=2.8.0)](https://travis-ci.org/quiltdata/quilt) | [![Linux](https://travis-ci.org/quiltdata/quilt.svg?branch=master)](https://travis-ci.org/quiltdata/quilt/branches) | 2.7, 3.4, 3.5, 3.6 |
 | <img height="20" src="http://icons.iconarchive.com/icons/icons8/windows-8/128/Systems-Mac-Os-icon.png"> | [![Build Status](https://travis-ci.org/quiltdata/quilt.svg?branch=2.8.0)](https://travis-ci.org/quiltdata/quilt) | [![Linux](https://travis-ci.org/quiltdata/quilt.svg?branch=master)](https://travis-ci.org/quiltdata/quilt/branches) | 2.7, 3.5, 3.6 |
